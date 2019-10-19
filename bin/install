@@ -39,7 +39,7 @@ function install_aria2() {
 
   (
     echo "∗ Downloading and installing aria2..."
-    curl --silent --location --output "$source_path" -C - "$download_url" || fail "Could not download"
+    curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download"
     tar -xjf "$source_path" -C "$install_path" --strip-components=1 || fail "Could not uncompress"
     echo "The installation was successful!"
     rm "$source_path"
