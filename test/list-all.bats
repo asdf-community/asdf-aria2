@@ -18,5 +18,5 @@
 @test "list-all command fails if first line is not the oldest version" {
   run asdf list-all aria2
   [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "1.2.0-rc2" ]
+  [ "${lines[0]}" = "1.19.1" ]
 }
