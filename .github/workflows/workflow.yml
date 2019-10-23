@@ -25,3 +25,10 @@ jobs:
           asdf install aria2 ${{ matrix.aria2 }}
           asdf global aria2 ${{ matrix.aria2 }}
           aria2c --version
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Run ShellCheck
+        run: shellcheck bin/*
