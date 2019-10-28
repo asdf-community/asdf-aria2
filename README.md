@@ -1,6 +1,6 @@
 <div align="center">
 <h1>asdf-aria2 📦</h1>
-aria2 plugin for asdf version manager
+<span><a href="https://aria2.github.io">aria2</a> plugin for asdf version manager</span>
 </div>
 <hr />
 
