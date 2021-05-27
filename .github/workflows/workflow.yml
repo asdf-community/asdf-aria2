@@ -2,21 +2,18 @@ name: Main workflow
 
 on:
   push:
-    paths-ignore:
-      - "**.md"
-      - ".all-contributorsrc"
   pull_request:
-    paths-ignore:
-      - "**.md"
-      - ".all-contributorsrc"
   schedule:
-    - cron: "0 0 * * 5"
+    - cron: 0 0 * * 5
 
 jobs:
   plugin_test:
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os:
+          - macos-latest
+          - ubuntu-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -25,26 +22,26 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v1
         with:
           command: aria2c --version
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install asdf
-        run: git clone https://github.com/asdf-vm/asdf.git $HOME/asdf
+      - name: Setup asdf
+        uses: asdf-vm/actions/setup@v1
+
+      - name: Install bats-core
+        run: brew install --build-from-source bats-core
 
       - name: Test plugin
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          . $HOME/asdf/asdf.sh
           asdf plugin-add aria2 $GITHUB_WORKSPACE
-          bats test
+          make test
+        env:
+          GITHUB_API_TOKEN: ${{ github.token }}
 
   lint:
     runs-on: ubuntu-latest
@@ -53,11 +50,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install ShellCheck
+        run: brew install shellcheck
+
       - name: Run ShellCheck
-        run: shellcheck bin/*
+        run: make lint
 
   format:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -67,4 +67,4 @@ jobs:
         run: brew install shfmt
 
       - name: Run shfmt
-        run: shfmt -d -i 2 -ci .
+        run: make fmt-check
