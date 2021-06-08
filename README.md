@@ -12,8 +12,6 @@
 asdf plugin-add aria2 https://github.com/asdf-community/asdf-aria2.git
 ```
 
-The aria2 project does not distribute binaries for Linux. When installing on Linux the source code will be downloaded and compiled. Some features of aria2 require libraries that must be installed on your machine at compile time to work. These are listed in the [aria2 documentation](https://aria2.github.io/manual/en/html/README.html#dependency).
-
 ## Usage
 
 Check [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to
