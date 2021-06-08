@@ -44,7 +44,18 @@ install_aria2() {
   (
     echo "∗ Downloading and installing aria2..."
     curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download"
-    tar -xjf "$source_path" -C "$install_path" --strip-components=1 || fail "Could not uncompress"
+
+    if [[ $OSTYPE =~ linux ]]; then
+
+      cd "$install_path" || exit 1
+
+      tar -xjf "$source_path" --strip-components=1 || fail "Could not uncompress"
+      ./configure --prefix "$install_path"
+      make
+      make install
+    else
+      tar -xjf "$source_path" -C "$install_path" --strip-components=1 || fail "Could not uncompress"
+    fi
     echo "The installation was successful!"
     rm "$source_path"
   ) || (
