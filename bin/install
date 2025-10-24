@@ -31,26 +31,63 @@ install_aria2() {
     fail "asdf-aria2 supports release installs only"
   fi
 
-  local download_url
+  local download_url="https://github.com/aria2/aria2/releases/download/release-${version}/aria2-${version}.tar.bz2"
+  local source_path="${install_path}/aria2-src.tar.bz2"
+  local build_path="${install_path}/aria2-src"
 
   case "$OSTYPE" in
-    darwin*) download_url="https://github.com/aria2/aria2/releases/download/release-${version}/aria2-${version}-osx-darwin.tar.bz2" ;;
-    linux*) download_url="https://github.com/aria2/aria2/releases/download/release-${version}/aria2-${version}.tar.bz2" ;;
+    darwin*)
+      # Check if pre-built binary exists (versions <= 1.35.0)
+      local prebuilt_url="https://github.com/aria2/aria2/releases/download/release-${version}/aria2-${version}-osx-darwin.tar.bz2"
+      if curl --silent --fail --head "$prebuilt_url" >/dev/null 2>&1; then
+        download_url="$prebuilt_url"
+        (
+          echo "∗ Downloading and installing aria2..."
+          curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download"
+          tar -xjf "$source_path" -C "$install_path" --strip-components=1 || fail "Could not uncompress"
+          echo "The installation was successful!"
+          rm "$source_path"
+        ) || (
+          rm -rf "$install_path"
+          fail "An error occurred"
+        )
+      else
+        # Build from source for versions >= 1.36.0
+        (
+          echo "∗ Downloading aria2 source code..."
+          curl --silent --location --output "$source_path" "$download_url" || fail "Could not download"
+          mkdir -p "$build_path"
+          tar -xjf "$source_path" -C "$build_path" --strip-components=1 || fail "Could not uncompress"
+
+          echo "∗ Building aria2 from source (this may take a few minutes)..."
+          cd "$build_path"
+          ./configure --prefix="$install_path" --without-libxml2 --without-libexpat --without-sqlite3 || fail "Could not configure"
+          make -j"$(sysctl -n hw.ncpu)" || fail "Could not build"
+          make install || fail "Could not install"
+
+          echo "The installation was successful!"
+          cd /
+          rm -rf "$source_path" "$build_path"
+        ) || (
+          rm -rf "$install_path"
+          fail "An error occurred"
+        )
+      fi
+      ;;
+    linux*)
+      (
+        echo "∗ Downloading and installing aria2..."
+        curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download"
+        tar -xjf "$source_path" -C "$install_path" --strip-components=1 || fail "Could not uncompress"
+        echo "The installation was successful!"
+        rm "$source_path"
+      ) || (
+        rm -rf "$install_path"
+        fail "An error occurred"
+      )
+      ;;
     *) fail "Unsupported platform" ;;
   esac
-
-  local source_path="${install_path}/bin/aria2.tar.bz2"
-
-  (
-    echo "∗ Downloading and installing aria2..."
-    curl --silent --location --create-dirs --output "$source_path" "$download_url" || fail "Could not download"
-    tar -xjf "$source_path" -C "$install_path" --strip-components=1 || fail "Could not uncompress"
-    echo "The installation was successful!"
-    rm "$source_path"
-  ) || (
-    rm -rf "$install_path"
-    fail "An error occurred"
-  )
 }
 
 install_aria2 "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
