@@ -39,7 +39,7 @@ install_aria2() {
     darwin*)
       # Check if pre-built binary exists (versions <= 1.35.0)
       local prebuilt_url="https://github.com/aria2/aria2/releases/download/release-${version}/aria2-${version}-osx-darwin.tar.bz2"
-      if curl --silent --fail --head "$prebuilt_url" > /dev/null 2>&1; then
+      if curl --silent --fail --head "$prebuilt_url" >/dev/null 2>&1; then
         download_url="$prebuilt_url"
         (
           echo "∗ Downloading and installing aria2..."
@@ -58,13 +58,13 @@ install_aria2() {
           curl --silent --location --output "$source_path" "$download_url" || fail "Could not download"
           mkdir -p "$build_path"
           tar -xjf "$source_path" -C "$build_path" --strip-components=1 || fail "Could not uncompress"
-          
+
           echo "∗ Building aria2 from source (this may take a few minutes)..."
           cd "$build_path"
           ./configure --prefix="$install_path" --without-libxml2 --without-libexpat --without-sqlite3 || fail "Could not configure"
           make -j"$(sysctl -n hw.ncpu)" || fail "Could not build"
           make install || fail "Could not install"
-          
+
           echo "The installation was successful!"
           cd /
           rm -rf "$source_path" "$build_path"
