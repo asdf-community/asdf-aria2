@@ -33,6 +33,9 @@ jobs:
       - name: Setup asdf
         uses: asdf-vm/actions/setup@v1
 
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
       - name: Install bats-core
         run: brew install --build-from-source bats-core
 
@@ -44,11 +47,14 @@ jobs:
           GITHUB_API_TOKEN: ${{ github.token }}
 
   lint:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
       - name: Install ShellCheck
         run: brew install shellcheck
@@ -62,6 +68,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
       - name: Install shfmt
         run: brew install shfmt
